@@ -1,0 +1,123 @@
+Microsoft Windows [Version 6.1.7600]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Users\YPI>d:
+
+D:\>cd clau
+
+D:\clau>dir
+ Volume in drive D is DATA
+ Volume Serial Number is 8E66-9600
+
+ Directory of D:\clau
+
+29/08/2018  18:02    <DIR>          .
+29/08/2018  18:02    <DIR>          ..
+29/08/2018  18:02                26 hello-world.js
+29/08/2018  18:02                20 hello-world.py
+               2 File(s)             46 bytes
+               2 Dir(s)  109.173.977.088 bytes free
+
+D:\clau>git init
+Initialized empty Git repository in D:/clau/.git/
+
+D:\clau>git status
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        hello-world.js
+        hello-world.py
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+D:\clau>git add .
+
+D:\clau>git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+        new file:   hello-world.js
+        new file:   hello-world.py
+
+
+D:\clau>git commit -m 'ini file pertama'
+error: pathspec 'file' did not match any file(s) known to git.
+error: pathspec 'pertama'' did not match any file(s) known to git.
+
+D:\clau>git commit -m "ini file pertama"
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'YPI@laborc19.(none)')
+
+D:\clau>git config --global user.email "claudia.claudia100@yahoo.com"
+
+D:\clau>git config --global user.name "Claud"
+
+D:\clau>git commit -m "ini file pertama"
+[master (root-commit) 3ab6918] ini file pertama
+ 2 files changed, 2 insertions(+)
+ create mode 100644 hello-world.js
+ create mode 100644 hello-world.py
+
+D:\clau>git status
+On branch master
+nothing to commit, working tree clean
+
+D:\clau>git push
+fatal: No configured push destination.
+Either specify the URL from the command-line or configure a remote repository us
+ing
+
+    git remote add <name> <url>
+
+and then push using the remote name
+
+    git push <name>
+
+
+D:\clau>git remote add origin https://github.com/Clauud/School.git
+
+D:\clau>git push
+fatal: The current branch master has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin master
+
+
+D:\clau>git push -u origin master
+Username for 'https://github.com': Clauud
+Password for 'https://Clauud@github.com':
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/Clauud/School.git/'
+
+D:\clau>git push -u origin master
+Username for 'https://github.com': Clauud
+Password for 'https://Clauud@github.com':
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (4/4), 305 bytes | 305.00 KiB/s, done.
+Total 4 (delta 0), reused 0 (delta 0)
+To https://github.com/Clauud/School.git
+ * [new branch]      master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+
+D:\clau>

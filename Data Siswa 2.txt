@@ -1,0 +1,188 @@
+Imports MySql.Data.MySqlClient
+Imports MySql.Data
+Public Class Data_Siswa
+    Sub NISotomatis()
+        Call BukaKoneksi()
+        cmd = New MySqlCommand("Select*From siswa where NIS in(Select max(NIS)from siswa)", Konek)
+        dr = cmd.ExecuteReader
+        dr.Read()
+        If Not dr.HasRows Then
+            TextBox1.Text = Format(Now, "yy") + "001"
+        Else
+            If Microsoft.VisualBasic.Left(dr.Item("NIS"), 2) = Format(Now, "yy") Then
+                TextBox1.Text = dr.Item("NIS") + 1
+            Else
+                TextBox1.Text = Format(Now, "yy") + "001"
+            End If
+        End If
+    End Sub
+#Region "Control Form"
+    Sub clear()
+        TextBox2.Clear()
+        TextBox5.Clear()
+        TextBox2.Focus()
+    End Sub
+    Sub Data_Baru()
+        TextBox2.Clear()
+        TextBox5.Clear()
+        TextBox2.Focus()
+    End Sub
+#End Region
+#Region "Tampilkan Data"
+    Sub Tampilgrid()
+        Call BukaKoneksi()
+        da = New MySqlDataAdapter("Select*From siswa", Konek)
+        ds = New DataSet
+        da.Fill(ds)
+        DGV.DataSource = ds.Tables(0)
+        DGV.ReadOnly = True
+        DGV.Columns(4).DefaultCellStyle.Format = "###,###,###"
+        DGV.Columns(4).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+    End Sub
+    Sub Tampilkan_Data_Berdasarkan_Nama()
+        Call BukaKoneksi()
+        cmd = New MySqlCommand("Select*From siswa where Nama_Siswa like '%" & TextBox5.Text & "%'", Konek)
+        dr = cmd.ExecuteReader
+        dr.Read()
+        If dr.HasRows Then
+            Call BukaKoneksi()
+            da = New MySqlDataAdapter("Select*From siswa where Nama_Siswa like '%" & TextBox5.Text & "%'", Konek)
+            ds = New DataSet
+            da.Fill(ds)
+            DGV.DataSource = ds.Tables(0)
+        Else
+            MsgBox("Data Tidak Ditemukan!")
+        End If
+    End Sub
+#End Region
+#Region "Pengolahan Database"
+    Sub Settingkelas()
+        Call BukaKoneksi()
+        cmd = New MySqlCommand("Select count(*) from siswa ", Konek)
+        dr = cmd.ExecuteReader
+        dr.Read()
+        If dr.Item(0) <= 5 Then
+            TextBox3.Text = "1A"
+        ElseIf dr.Item(0) <= 10 Then
+            TextBox3.Text = "1B"
+        ElseIf dr.Item(0) <= 15 Then
+            TextBox3.Text = "1C"
+        ElseIf dr.Item(0) <= 20 Then
+            TextBox3.Text = "1D"
+        Else
+            TextBox3.Text = "1Z"
+        End If
+    End Sub
+#End Region
+    Private Sub Data_Siswa_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Call NISotomatis()
+        Call Tampilgrid()
+        Label7.Text = DateValue("10/07/" & Year(Today) & "")
+        Dim TahunAjaran As String = Format(Today, "yyyy") & "-" & Format(Today, "yyyy") + 1
+        Label8.Text = TahunAjaran
+        If Microsoft.VisualBasic.Left(Label8.Text, 4) = Format(Now, "yyyy") Then
+            TextBox4.Text = 150000
+            TextBox4.Text = FormatNumber(TextBox4.Text, 0)
+        ElseIf Microsoft.VisualBasic.Left(Label8.Text, 4) = Format(Now, "yyyy") + 1 Then
+            TextBox4.Text = 200000
+            TextBox4.Text = FormatNumber(TextBox4.Text, 0)
+        End If
+        Call Settingkelas()
+    End Sub
+    Private Sub TextBox2_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TextBox2.KeyPress
+        TextBox2.MaxLength = 30
+        If e.KeyChar = Chr(13) Then
+            btnSimpan.Focus()
+        End If
+    End Sub
+    Private Sub btnSimpan_Click(sender As Object, e As EventArgs) Handles btnSimpan.Click
+        If TextBox1.Text = "" Or TextBox2.Text = "" Or TextBox4.Text = "" Or TextBox3.Text = "" Then
+            MsgBox("data belum lengkap")
+            Exit Sub
+        Else
+            Call BukaKoneksi()
+            cmd = New MySqlCommand("select*from siswa where NIS ='" & TextBox1.Text & "'", Konek)
+            dr = cmd.ExecuteReader
+            dr.Read()
+            If Not dr.HasRows Then
+                Call BukaKoneksi()
+                Dim simpan As String = "insert into siswa values('" & TextBox1.Text & "','" & TextBox2.Text & "','" & TextBox3.Text & "','" & Label8.Text & "','" & Microsoft.VisualBasic.Str(TextBox4.Text) & "')"
+                cmd = New MySqlCommand(simpan, Konek)
+                cmd.ExecuteNonQuery()
+                For i As Integer = 1 To 12
+                    Dim TempO As Date = DateAdd(DateInterval.Month, i - 1, DateValue(Label7.Text))
+                    Call BukaKoneksi()
+                    Dim hasil As String = TextBox1.Text
+                    Dim simpandetail2 As String = "insert into spp values('" & TextBox1.Text & i & "',0,'" & Format(TempO, "MM/dd/yyyy") & "','" & Format(TempO, "MMMM") + " " + Format(TempO, "yyyy") & "','" & TextBox1.Text & "',0,'-','-')"
+                    cmd = New MySqlCommand(simpandetail2, Konek)
+                    cmd.ExecuteNonQuery()
+                Next
+                cmd = New MySqlCommand("select * from spp order by Bulan", Konek)
+                dr = cmd.ExecuteReader
+                dr.Read()
+            Else
+                Call BukaKoneksi()
+                Dim edit As String = "update siswa set Nama_Siswa '" & TextBox2.Text & "',Kelas='" & TextBox3.Text & "',Tahun_Ajaran='" & Label8.Text & "',Biaya='" & TextBox4.Text & "' where NIS='" & TextBox1.Text & "'"
+                cmd = New MySqlCommand(edit, Konek)
+                cmd.ExecuteNonQuery()
+            End If
+            Call clear()
+            Call Tampilgrid()
+            Call NISotomatis()
+            Call Settingkelas()
+        End If
+    End Sub
+    Private Sub btnHapus_Click(sender As Object, e As EventArgs) Handles btnHapus.Click
+        If TextBox1.Text = "" Then
+            MsgBox("kode Siswa harus diisi dulu")
+            TextBox1.Focus()
+            Exit Sub
+        Else
+            Call BukaKoneksi()
+            cmd = New MySqlCommand("Select distinct NIS from spp where NIS ='" & TextBox1.Text & "' and Jumlah >0", Konek)
+            dr = cmd.ExecuteReader
+            dr.Read()
+            If dr.HasRows Then
+                MsgBox("NIS tidak dapat dihapus karena sudah ada dalam data pembayaran")
+                Call clear()
+                Call NISotomatis()
+                Exit Sub
+            End If
+            If MessageBox.Show("hapus data ini...?", "", MessageBoxButtons.YesNo) = Windows.Forms.DialogResult.Yes Then
+                Call BukaKoneksi()
+                Dim hapus As String = "delete from siswa where NIS ='" & TextBox1.Text & "'"
+                cmd = New MySqlCommand(hapus, Konek)
+                cmd.ExecuteNonQuery()
+                Dim HapusNISSPP As String = "delete from spp where NIS='" & TextBox1.Text & "'"
+                cmd = New MySqlCommand(HapusNISSPP, Konek)
+                cmd.ExecuteNonQuery()
+                Call clear()
+                Call Tampilgrid()
+                Call NISotomatis()
+            Else
+                Call clear()
+            End If
+        End If
+    End Sub
+    Private Sub btnBatal_Click(sender As Object, e As EventArgs) Handles btnBatal.Click
+        Call clear()
+        Call NISotomatis()
+    End Sub
+    Private Sub btnKeluar_Click(sender As Object, e As EventArgs) Handles btnKeluar.Click
+        Me.Close()
+    End Sub
+    Private Sub btnCari_Click(sender As Object, e As EventArgs) Handles btnCari.Click
+        Call Tampilkan_Data_Berdasarkan_Nama()
+        Call clear()
+    End Sub
+    Private Sub DGV_CellMouseClick(sender As Object, e As DataGridViewCellMouseEventArgs) Handles DGV.CellMouseClick
+        On Error Resume Next
+        TextBox1.Text = DGV.Rows(e.RowIndex).Cells(0).Value
+        TextBox2.Text = DGV.Rows(e.RowIndex).Cells(1).Value
+        TextBox3.Text = DGV.Rows(e.RowIndex).Cells(2).Value
+        TextBox4.Text = DGV.Rows(e.RowIndex).Cells(4).Value
+    End Sub
+    Private Sub TextBox3_LostFocus(sender As Object, e As EventArgs) Handles TextBox3.LostFocus
+        TextBox3.Text = UCase(TextBox3.Text)
+    End Sub
+End Class
